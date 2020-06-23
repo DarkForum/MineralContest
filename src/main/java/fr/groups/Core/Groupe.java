@@ -10,6 +10,7 @@ import fr.groups.Utils.Etats;
 import fr.mineral.Core.Game.Game;
 import fr.mineral.Core.House;
 import fr.mineral.Core.Player.BaseItem.PlayerBaseItem;
+import fr.mineral.Core.Referee.Referee;
 import fr.mineral.Settings.GameSettings;
 import fr.mineral.Teams.Equipe;
 import fr.mineral.Translation.Lang;
@@ -18,6 +19,8 @@ import javafx.util.Pair;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -67,6 +70,29 @@ public class Groupe {
         genererIdentifiant();
 
         this.playerBaseItem = new PlayerBaseItem(this);
+    }
+
+    /**
+     * Méthode permettant de remettre à 0 une partie
+     * Cette méthode est appelée à la fin d'une partie
+     */
+    public void resetGame() {
+        this.partie = new Game(this);
+        this.partie.init();
+    }
+
+    /**
+     * Retire tous les items au sol
+     * Source: https://bukkit.org/threads/remove-dropped-items-on-ground.100750/
+     */
+    public void removeAllDroppedItem() {
+        List<Entity> entList = gameWorld.getEntities();//get all entities in the world
+
+        for (Entity current : entList) {//loop through the list
+            if (current instanceof Item) {//make sure we aren't deleting mobs/players
+                current.remove();//remove it
+            }
+        }
     }
 
     public PlayerBaseItem getPlayerBaseItem() {
@@ -151,8 +177,26 @@ public class Groupe {
             return false;
         }
 
+
         Location worldSpawnLocation = gameWorld.getSpawnLocation();
+
+        try {
+            if (worldSpawnLocation.getX() == WorldLoader.defaultX && worldSpawnLocation.getY() == WorldLoader.defaultY && worldSpawnLocation.getZ() == WorldLoader.defaultZ)
+                worldSpawnLocation = partie.getArene().getCoffre().getPosition();
+        } catch (Exception e) {
+            worldSpawnLocation = gameWorld.getSpawnLocation();
+        }
+
+
+
         for (Player joueur : joueurs) {
+            joueur.getInventory().clear();
+
+            // Si le joueur est un arbitre, on lui donne le livre
+            if (getGame().isReferee(joueur)) joueur.getInventory().setItemInMainHand(Referee.getRefereeItem());
+
+                // Sinon, on lui donne le livre de selection d'équipe!
+            else joueur.getInventory().setItemInMainHand(Game.getTeamSelectionItem());
             joueur.teleport(worldSpawnLocation);
             joueur.sendMessage(mineralcontest.prefixPrive + Lang.set_yourself_as_ready_to_start_game.toString());
         }
@@ -375,7 +419,7 @@ public class Groupe {
      */
     public void addDisconnectedPlayer(Player p) {
         Pair<Equipe, Location> playerInfo = new Pair<>(getPlayerTeam(p), p.getLocation());
-        joueurs.remove(p);
+        retirerJoueur(p);
         if (!havePlayerDisconnected(p)) disconnectedPlayers.put(p.getUniqueId(), playerInfo);
     }
 
@@ -394,7 +438,7 @@ public class Groupe {
             // Si la team n'est pas nulle, on le remet dans son équipe
             if (playerTeam != null) {
                 try {
-                    playerTeam.addPlayerToTeam(p, true);
+                    playerTeam.addPlayerToTeam(p, true, false);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

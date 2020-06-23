@@ -2,8 +2,6 @@ package fr.mineral.Translation;
 
 import fr.groups.Core.Groupe;
 import fr.mineral.Core.Game.Game;
-import fr.mineral.Settings.GameSettings;
-import fr.mineral.Settings.GameSettingsCvarOLD;
 import fr.mineral.Teams.Equipe;
 import fr.mineral.Utils.ErrorReporting.Error;
 import fr.mineral.Utils.Log.GameLogger;
@@ -161,7 +159,7 @@ public enum Lang {
     error_you_already_have_a_group("error_you_already_have_a_group", "Vous avez déjà un groupe."),
     error_group_with_this_name_already_exists("error_group_with_this_name_already_exists", "Un groupe avec ce nom existe déjà"),
     success_group_successfully_created("success_group_successfully_created", "Le groupe a été crée avec succès"),
-    error_command_can_only_be_used_hub_world("error_command_can_only_be_used_hub_world", "Cette commande ne peut être utilisé que dans le HUB."),
+    error_command_can_only_be_used_hub_world("error_command_can_only_be_used_hub_world", "Cette commande ne peut être utilisé que dans le monde %hubWorldName%."),
     error_you_must_be_in_a_group("error_you_must_be_in_a_group", "Vous devez être dans un groupe."),
     error_you_must_be_group_admin("error_you_must_be_group_admin", "Vous devez être administrateur du groupe"),
     error_no_player_with_this_name("error_no_player_with_this_name", "Il n'y a pas de joueurs avec ce nom"),
@@ -248,9 +246,10 @@ public enum Lang {
     map_downloader_delete_description("map_downloader_delete_description", "Voulez-vous vraiment supprimer la map ? Un menu de confirmation s'ouvrira après"),
     player_base_item_inventory_title("player_base_item_inventory_title", "Inventaire de réapparition"),
     player_base_item_close_inventory_item_title("player_base_item_close_inventory_item_title", "Fermer le menu"),
-    error_no_maps_downloaded_to_start_game("error_no_maps_downloaded_to_start_game", "Aucune map n'a été téléchargée, un joueur OP peut en télécharger avec la commande /mcdownloader");
-
-
+    error_no_maps_downloaded_to_start_game("error_no_maps_downloaded_to_start_game", "Aucune map n'a été téléchargée, un joueur OP peut en télécharger avec la commande /mcdownloader"),
+    error_no_teams_with_player("error_no_teams_with_player", "Il n'y a aucune équipe avec des joueurs!"),
+    currently_no_player_in_this_team("currently_no_player_in_this_team", "Aucun joueur dans cette équipe pour le moment"),
+    item_team_selection_title("item_team_selection_title", "Choisir une équipe");
 
     private String path;
     private String def;
@@ -459,6 +458,11 @@ public enum Lang {
         if(string.contains("%underline%")) string = string.replace("%underline%", "" + ChatColor.UNDERLINE);
         if(string.contains("%italic%")) string = string.replace("%italic%", "" + ChatColor.ITALIC);
 
+
+        if (string.contains("%hubWorldName%"))
+            string = string.replace("%hubWorldName%", mineralcontest.getPluginConfigValue("world_name").toString());
+
+
         return string;
     }
 
@@ -471,12 +475,6 @@ public enum Lang {
         if (string.contains("%coloredWinningTeamName%"))
             string = string.replace("%coloredWinningTeamName%", "" + partie.getWinningTeam().getCouleur() + partie.getWinningTeam().getNomEquipe());
 
-        try {
-            if (string.contains("%requiredPlayers%"))
-                string = string.replace("%requiredPlayers%", "" + (3 * partie.groupe.getParametresPartie().getCVAR("mp_team_max_player").getValeurNumerique()));
-        } catch (Exception e) {
-            Error.Report(e, partie);
-        }
 
         if (string.contains("%onlinePlayers%"))
             string = string.replace("%onlinePlayers%", partie.groupe.getPlayerCount() + "");

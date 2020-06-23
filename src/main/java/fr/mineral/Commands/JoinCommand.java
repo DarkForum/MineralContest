@@ -3,7 +3,6 @@ package fr.mineral.Commands;
 import fr.mineral.Core.Game.Game;
 import fr.mineral.Core.House;
 import fr.mineral.Settings.GameSettings;
-import fr.mineral.Settings.GameSettingsCvarOLD;
 import fr.mineral.Teams.Equipe;
 import fr.mineral.Translation.Lang;
 import fr.mineral.Utils.ChatColorString;
@@ -37,9 +36,12 @@ public class JoinCommand implements CommandExecutor {
 
             if(command.getName().equalsIgnoreCase("join")) {
                 try {
+                    if (partie.isGameStarted() && !partie.isGamePaused() || partie.isPreGame()) return false;
                     if (settings.getCVAR("mp_randomize_team").getValeurNumerique() == 0) {
-                        if (partie.isReferee((Player) sender)) {
-                            sender.sendMessage("You cant join a team, you are a referee");
+
+
+                        if (args.length == 0) {
+                            partie.openTeamSelectionMenuToPlayer(player);
                             return false;
                         }
 
@@ -62,16 +64,15 @@ public class JoinCommand implements CommandExecutor {
                                 return false;
                             }
 
-                            if (selectedHouse.getTeam().getJoueurs().size() >= settings.getCVAR("mp_team_max_player").getValeurNumerique()) {
-                                player.sendMessage(mineralcontest.prefixErreur + Lang.team_is_full.toString());
-                                return false;
-                            }
-
                             Equipe defaultPlayerTeam = partie.getPlayerTeam(player);
                             if (defaultPlayerTeam != null) defaultPlayerTeam.removePlayer(player);
 
                             try {
-                                selectedHouse.getTeam().addPlayerToTeam(player, false);
+                                if (partie.isReferee((Player) sender)) {
+                                    partie.removeReferee((Player) sender);
+                                }
+
+                                selectedHouse.getTeam().addPlayerToTeam(player, false, !(partie.isGameStarted() || partie.isGamePaused()));
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 Error.Report(e, partie);
@@ -81,6 +82,7 @@ public class JoinCommand implements CommandExecutor {
 
                             return false;
                         }
+
                     } else {
                         sender.sendMessage(mineralcontest.prefixErreur + Lang.translate(Lang.admin_team_will_be_randomized.toString()));
                         return true;
@@ -96,4 +98,6 @@ public class JoinCommand implements CommandExecutor {
 
         return false;
     }
+
+
 }

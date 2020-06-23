@@ -1,9 +1,9 @@
 package fr.mineral.Events;
 
+import fr.mapbuilder.MapBuilder;
 import fr.mineral.Core.Game.BlockManager;
 import fr.mineral.Core.Game.Game;
 import fr.mineral.Settings.GameSettings;
-import fr.mineral.Settings.GameSettingsCvarOLD;
 import fr.mineral.Translation.Lang;
 import fr.mineral.Utils.Radius;
 import fr.mineral.mineralcontest;
@@ -17,6 +17,7 @@ public class BucketEvent implements Listener {
 
     @EventHandler
     public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) throws Exception {
+        if (MapBuilder.getInstance().isBuilderModeEnabled) return;
         World currentWorld = event.getPlayer().getWorld();
         if (mineralcontest.isAMineralContestWorld(currentWorld)) {
             boolean allowedToBePlaced = true;

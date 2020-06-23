@@ -7,6 +7,7 @@ import fr.groups.GroupeExtension;
 import fr.groups.Utils.Etats;
 import fr.mineral.Commands.*;
 import fr.mineral.Core.Game.Game;
+import fr.mineral.Core.Game.JoinTeam.JoinTeamInventoryEvent;
 import fr.mineral.Core.Player.BaseItem.Commands.SetDefaultItems;
 import fr.mineral.Core.Player.BaseItem.Events.InventoryClick;
 import fr.mineral.Settings.GameSettings;
@@ -152,7 +153,6 @@ public final class mineralcontest extends JavaPlugin {
 
 
     public void initCommunityVersion() {
-        Bukkit.getLogger().severe("COMMUNITY VERSION: " + communityVersion);
         if (!communityVersion) {
             Groupe defaut = new Groupe();
             defaut.setEtat(Etats.EN_ATTENTE);
@@ -323,6 +323,10 @@ public final class mineralcontest extends JavaPlugin {
 
         // PlayerBaseItem
         Bukkit.getServer().getPluginManager().registerEvents(new InventoryClick(), this);
+
+        // JoinMenu
+        Bukkit.getServer().getPluginManager().registerEvents(new JoinTeamInventoryEvent(), this);
+
 
 
     }

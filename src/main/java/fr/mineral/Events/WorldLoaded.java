@@ -1,8 +1,5 @@
 package fr.mineral.Events;
 
-import fr.groups.Core.Groupe;
-import fr.mineral.Core.Game.Game;
-import fr.mineral.Settings.GameSettingsCvarOLD;
 import fr.mineral.Utils.ErrorReporting.Error;
 import fr.mineral.Utils.Player.PlayerUtils;
 import fr.mineral.mineralcontest;

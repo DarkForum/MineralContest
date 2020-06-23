@@ -21,9 +21,17 @@ public class AfficherScoreboardToEveryoneItem extends RefereeItemTemplate {
         Groupe groupe = mineralcontest.getPlayerGroupe(joueur);
         if (groupe == null || !groupe.getGame().isGameStarted()) return;
 
-        for (House maison : groupe.getGame().getHouses())
-            if (!maison.getTeam().getJoueurs().isEmpty())
+
+        int teamNonEmpty = 0;
+        for (House maison : groupe.getGame().getHouses()) {
+            if (!maison.getTeam().getJoueurs().isEmpty()) {
                 groupe.sendToEveryone(Lang.translate(Lang.team_score.toString(), maison.getTeam()));
+                teamNonEmpty++;
+            }
+        }
+
+        if (teamNonEmpty == 0)
+            joueur.sendMessage(mineralcontest.prefixErreur + Lang.error_no_teams_with_player.toString());
     }
 
     @Override

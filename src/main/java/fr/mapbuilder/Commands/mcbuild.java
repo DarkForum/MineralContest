@@ -45,7 +45,9 @@ public class mcbuild extends CommandTemplate {
         constructArguments();
 
         accessCommande.add(PLAYER_COMMAND);
-
+        accessCommande.add(PLAYER_ADMIN);
+        accessCommande.add(GROUP_REQUIRED);
+        accessCommande.add(GAME_NOT_STARTED);
 
     }
 

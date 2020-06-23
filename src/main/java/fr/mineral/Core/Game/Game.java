@@ -3,9 +3,9 @@ package fr.mineral.Core.Game;
 import fr.groups.Core.Groupe;
 import fr.groups.Utils.Etats;
 import fr.mineral.Core.Arena.Arene;
+import fr.mineral.Core.Game.JoinTeam.Inventories.InventoryInterface;
+import fr.mineral.Core.Game.JoinTeam.Inventories.SelectionEquipeInventory;
 import fr.mineral.Core.House;
-import fr.mineral.Events.PlayerMove;
-import fr.mineral.Settings.GameSettingsCvarOLD;
 import fr.mineral.Teams.Equipe;
 import fr.mineral.Translation.Lang;
 import fr.mineral.Utils.BlockSaver;
@@ -15,7 +15,6 @@ import fr.mineral.Utils.ErrorReporting.Error;
 import fr.mineral.Utils.Log.GameLogger;
 import fr.mineral.Utils.Log.Log;
 import fr.mineral.Utils.Metric.SendInformation;
-import fr.mineral.Utils.MobKiller;
 import fr.mineral.Utils.Player.CouplePlayerTeam;
 import fr.mineral.Utils.Player.PlayerUtils;
 import fr.mineral.Utils.Radius;
@@ -27,6 +26,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -68,6 +69,13 @@ public class Game implements Listener {
     private LinkedList<Block> addedChests;
 
 
+    /**
+     * JoinTeam module
+     * Permet de rejoindre une équipe à partir d'un menu
+     */
+    private InventoryInterface available_teams_inventory;
+
+
     // Group of the game
     public Groupe groupe;
 
@@ -87,6 +95,7 @@ public class Game implements Listener {
         return winner;
     }
 
+
     // Save the blocks
     public LinkedList<BlockSaver> affectedBlocks;
 
@@ -96,7 +105,6 @@ public class Game implements Listener {
 
         this.groupe = g;
 
-        //votemap.enableVote();
         this.disconnectedPlayers = new LinkedList<CouplePlayerTeam>();
         this.affectedBlocks = new LinkedList<>();
         this.referees = new LinkedList<>();
@@ -104,13 +112,31 @@ public class Game implements Listener {
         this.PlayerThatTriedToLogIn = new HashMap<>();
 
         this.equipes = new LinkedList<>();
-
         this.addedChests = new LinkedList<>();
         this.arene = new Arene(groupe);
 
 
+
         initGameSettings();
     }
+
+
+    /**
+     * Ouvre l'inventaire de selection d'équipe à un joueur
+     *
+     * @param p
+     */
+    public void openTeamSelectionMenuToPlayer(Player p) {
+        if (available_teams_inventory == null) available_teams_inventory = new SelectionEquipeInventory(equipes);
+        available_teams_inventory.openInventory(p);
+    }
+
+    public InventoryInterface getTeamSelectionMenu() {
+        if (available_teams_inventory == null) available_teams_inventory = new SelectionEquipeInventory(equipes);
+        available_teams_inventory.setInventoryItems();
+        return available_teams_inventory;
+    }
+
 
     private void initGameSettings() {
         try {
@@ -151,6 +177,16 @@ public class Game implements Listener {
     }
 
     /**
+     * Fonction permettant de retourner vrai si le bloc passé en paramètre est déjà marqué comme "autorisé" à être ouvert
+     *
+     * @param b
+     * @return
+     */
+    public boolean isThisChestAlreadySaved(Block b) {
+        return addedChests.contains(b);
+    }
+
+    /**
      * Retourne une maison à partir d'un nom, ou d'une couleur
      *
      * @param name
@@ -184,16 +220,6 @@ public class Game implements Listener {
         if(!this.addedChests.contains(block)) this.addedChests.remove(block);
     }
 
-    public boolean areAllPlayerLoggedIn() {
-
-        try {
-            return ((groupe.getPlayers().size() - getRefereeCount()) >= (groupe.getParametresPartie().getCVAR("mp_team_max_player").getValeurNumerique()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            Error.Report(e, this);
-        }
-        return false;
-    }
 
     public void teleportToLobby(Player player) {
         Location spawnLocation = mineralcontest.plugin.pluginWorld.getSpawnLocation();
@@ -398,7 +424,7 @@ public class Game implements Listener {
 
         if (getPlayerTeam(p) != null) getPlayerTeam(p).removePlayer(p);
         try {
-            equipes.get(nombreAleatoire).getTeam().addPlayerToTeam(p, true);
+            equipes.get(nombreAleatoire).getTeam().addPlayerToTeam(p, true, true);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -673,6 +699,7 @@ public class Game implements Listener {
 
                             if(tempsPartie == 0) {
                                 terminerPartie();
+                                this.cancel();
                             }
 
                             // On gère la deathzone
@@ -703,27 +730,6 @@ public class Game implements Listener {
 
         }.runTaskTimer(mineralcontest.plugin, 0, 20);
 
-    }
-
-    /**
-     * Récupèe une équipe non pleine
-     * @return
-     */
-    public Equipe getEquipeNonPleine() {
-        int mp_team_max_player = 0;
-
-        try {
-            mp_team_max_player = groupe.getParametresPartie().getCVAR("mp_randomize_team").getValeurNumerique();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Error.Report(e, this);
-        }
-
-        for (House maison : equipes)
-            if (maison.getTeam().getJoueurs().size() < mp_team_max_player)
-                return maison.getTeam();
-
-        return null;
     }
 
     /**
@@ -825,6 +831,7 @@ public class Game implements Listener {
         this.groupe.setEtat(Etats.EN_ATTENTE);
         this.groupe.setGroupLocked(false);
         this.groupe.enableVote();
+        this.groupe.resetGame();
 
     }
 
@@ -1030,6 +1037,10 @@ public class Game implements Listener {
         handleDoors();
         removeAllDroppedItems();
 
+
+        // On supprime tous les items au sol
+        groupe.removeAllDroppedItem();
+
         return true;
 
     }
@@ -1063,7 +1074,7 @@ public class Game implements Listener {
 
             Player joueuraAttribuer = joueursEnAttente.get(numeroJoueurRandom);
             House equipeAAttribuer = equipesDispo.get(numeroEquipeRandom);
-            equipeAAttribuer.getTeam().addPlayerToTeam(joueuraAttribuer, false);
+            equipeAAttribuer.getTeam().addPlayerToTeam(joueuraAttribuer, false, true);
 
             equipesDispo.remove(numeroEquipeRandom);
             joueursEnAttente.remove(numeroJoueurRandom);
@@ -1079,7 +1090,7 @@ public class Game implements Listener {
         for (House house : equipes) {
             if (ChatColorString.toString(house.getTeam().getCouleur()).equalsIgnoreCase(teamName)) {
                 if (team != null) team.removePlayer(joueur);
-                house.getTeam().addPlayerToTeam(joueur, true);
+                house.getTeam().addPlayerToTeam(joueur, true, false);
                 return;
             }
 
@@ -1101,5 +1112,16 @@ public class Game implements Listener {
         minutes = (tempsPartie % 3600) / 60;
         secondes = tempsPartie % 60;
         return String.format("%02d:%02d", minutes, secondes);
+    }
+
+    public static ItemStack getTeamSelectionItem() {
+        ItemStack item = new ItemStack(Material.BOOK, 1);
+
+        ItemMeta itemMeta = item.getItemMeta();
+        itemMeta.setDisplayName(Lang.item_team_selection_title.toString());
+        item.setItemMeta(itemMeta);
+
+        return item;
+
     }
 }

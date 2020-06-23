@@ -29,6 +29,8 @@ public abstract class CommandTemplate extends BukkitCommand {
     protected final int REQUIRE_COMMUNITY_VERSION = 9;
     protected final int PLAYER_ADMIN = 10;
     protected final int PLAYER_IN_HUB = 11;
+    protected final int GAME_NOT_STARTED = 12;
+    protected final int VOTE_NOT_DONE = 13;
 
 
 
@@ -129,6 +131,12 @@ public abstract class CommandTemplate extends BukkitCommand {
                     throw new Exception(Lang.error_command_can_only_be_used_hub_world.toString());
             }
 
+            if (condition == GAME_NOT_STARTED) {
+                if (playerGroupe != null && playerGroupe.getGame() != null && (playerGroupe.getGame().isGameStarted() || playerGroupe.getGame().isPreGame()))
+                    throw new Exception("command can only be used when no game");
+            }
+
+
         }
 
         if (arguments.size() != receivedArgs.length) {
@@ -156,7 +164,6 @@ public abstract class CommandTemplate extends BukkitCommand {
             return false;
         }
 
-        Bukkit.getLogger().severe("Received: " + s);
 
         return performCommand(commandSender, s, strings);
     }

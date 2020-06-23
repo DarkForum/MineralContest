@@ -3,9 +3,7 @@ package fr.mineral.Teams;
 import fr.groups.Core.Groupe;
 import fr.mineral.Core.Game.Game;
 import fr.mineral.Core.House;
-import fr.mineral.Settings.GameSettingsCvarOLD;
 import fr.mineral.Translation.Lang;
-import fr.mineral.Utils.ErrorReporting.Error;
 import fr.mineral.Utils.Log.GameLogger;
 import fr.mineral.Utils.Log.Log;
 
@@ -116,49 +114,34 @@ public class Equipe implements Comparable<Equipe> {
     }
 
 
-    // Retourne true si la team est pleine, false si non
-    public boolean isTeamFull() {
-        try {
-            if (this.joueurs.size() >= groupe.getParametresPartie().getCVAR("mp_team_max_player").getValeurNumerique())
-                return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            Error.Report(e, groupe.getGame());
+    public boolean addPlayerToTeam(Player p, boolean switched, boolean teleportToBase) throws Exception {
+
+
+        Game partie = mineralcontest.getPlayerGame(p);
+
+        if (partie != null) {
+            Equipe team = mineralcontest.getPlayerGame(p).getPlayerTeam(p);
+            if (team != null) team.removePlayer(p);
+            if (mineralcontest.getPlayerGame(p).isReferee(p)) mineralcontest.getPlayerGame(p).removeReferee(p);
         }
-        return false;
-    }
-
-    public boolean addPlayerToTeam(Player p, boolean switched) throws Exception {
-        if (!isTeamFull() || switched || mineralcontest.getPlayerGame(p).isReferee(p)) {
-
-            Game partie = mineralcontest.getPlayerGame(p);
-
-            if (partie != null) {
-                Equipe team = mineralcontest.getPlayerGame(p).getPlayerTeam(p);
-                if (team != null) team.removePlayer(p);
-                if (mineralcontest.getPlayerGame(p).isReferee(p)) mineralcontest.getPlayerGame(p).removeReferee(p);
-            }
 
 
+        this.joueurs.add(p);
 
-            this.joueurs.add(p);
-
-            p.setGameMode(GameMode.SURVIVAL);
+        p.setGameMode(GameMode.SURVIVAL);
 
 
-            if (PlayerUtils.getPlayerItemsCountInInventory(p) == 0 && mineralcontest.getPlayerGame(p).isGameInitialized) {
-                //PlayerBaseItem.givePlayerItems(p, PlayerBaseItem.onFirstSpawnName);
+        if (PlayerUtils.getPlayerItemsCountInInventory(p) == 0 && mineralcontest.getPlayerGame(p).isGameInitialized) {
+            //PlayerBaseItem.givePlayerItems(p, PlayerBaseItem.onFirstSpawnName);
+            if (teleportToBase)
                 PlayerUtils.teleportPlayer(p, mineralcontest.getPlayerGroupe(p).getMonde(), mineralcontest.getPlayerGame(p).getPlayerHouse(p).getHouseLocation());
-            }
-
-            p.sendMessage(mineralcontest.prefix + Lang.translate(Lang.team_welcome.toString(), this));
-
-            mineralcontest.broadcastMessage(mineralcontest.prefixGlobal + Lang.translate(Lang.team_player_joined.toString(), this, p), groupe);
-            return true;
         }
 
-        p.sendMessage(mineralcontest.prefixPrive + Lang.translate(Lang.team_is_full.toString(), this));
-        return false;
+        p.sendMessage(mineralcontest.prefix + Lang.translate(Lang.team_welcome.toString(), this));
+
+        mineralcontest.broadcastMessage(mineralcontest.prefixGlobal + Lang.translate(Lang.team_player_joined.toString(), this, p), groupe);
+        return true;
+
     }
 
     public boolean removePlayer(Player p) {

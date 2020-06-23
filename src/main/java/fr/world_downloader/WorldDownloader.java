@@ -85,7 +85,33 @@ public class WorldDownloader {
 
     public void initMapLists() {
         printToConsole("Loading all map from workshop ...");
-        getMaps(true);
+
+        Thread thead = new Thread(() -> {
+            int tentatives = 0;
+
+            try {
+                while (!Urls.areAllUrlFetched) {
+                    // On ne veut pas faire plus de 5 tentatives, si c'est le cas on affiche un message d'erreur
+                    if (tentatives >= 5) {
+                        areMapsLoaded = true;
+                        throw new InterruptedException(mineralcontest.prefix + " Fetching all maps failed ...");
+                    }
+
+                    Bukkit.getLogger().info(mineralcontest.prefix + " All urls are not fetched yet.... Retrying in 2 sec");
+                    Thread.sleep(2 * 1000);
+                    tentatives++;
+                }
+
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+
+            getMaps(true);
+        });
+        thead.start();
+
     }
 
     private void registerInventories() {

@@ -1,5 +1,6 @@
 package fr.groups.Core;
 
+import fr.file_manager.FileList;
 import fr.groups.Utils.Etats;
 import fr.groups.Utils.FileManager.FileCopy;
 import fr.mineral.Core.Game.Game;
@@ -10,12 +11,14 @@ import fr.mineral.Utils.ErrorReporting.Error;
 import fr.mineral.mineralcontest;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,6 +27,9 @@ public class WorldLoader {
     private Groupe groupe;
     private String nomMonde;
     private Location spawnLocation;
+
+    // default spawn location if none set
+    protected static int defaultX = 999999, defaultY = 150, defaultZ = 999999;
 
     public WorldLoader(Groupe g) {
         this.groupe = g;
@@ -91,8 +97,10 @@ public class WorldLoader {
             if (this.spawnLocation != null) {
                 this.spawnLocation.setWorld(createdWorld);
             } else {
-                this.spawnLocation = groupe.getGame().getArene().getCoffre().getPosition();
+                this.spawnLocation = new Location(createdWorld, defaultX, defaultY, defaultZ);
             }
+
+
             createdWorld.setSpawnLocation(this.spawnLocation);
             createdWorld.setAutoSave(false);
 
@@ -121,6 +129,12 @@ public class WorldLoader {
 
     private void lireFichierMonde(String nomDossier, World monde) throws Exception {
         String nomFichierConfig = "mc_world_settings.yml";
+
+        // Variable utilisée pour vérifier les coffres présent dans un rayon de X bloc autour du spawn
+        int rayonDeBloc = 20;
+
+        // Liste contenant tous les blocks étant des coffres, utilisé pour autoriser leur ouverture
+        List<Block> chestToAdd = new ArrayList<>();
 
 
         File fichierConfigMonde = new File(nomDossier + File.separator + nomFichierConfig);
@@ -195,13 +209,28 @@ public class WorldLoader {
                 );
 
                 nouvelleEquipe.getPorte().addToDoor(locPorte.getBlock());
+
+
             }
+
+            // On vérifie partout autour du spawn si il y a des coffres dans un rayon de x blocs
+            chestToAdd.addAll(getNearbyBlocksByMaterial(Material.CHEST, spawnLoc, rayonDeBloc));
 
             nouvelleEquipe.setCoffreEquipe(chestLoc);
             nouvelleEquipe.setHouseLocation(spawnLoc);
             if(mineralcontest.debug) groupe.sendToadmin(mineralcontest.prefixPrive + "L'équipe " + couleur + nomEquipe + ChatColor.WHITE + " a bien été crée");
             groupe.getGame().addEquipe(nouvelleEquipe);
         }
+
+        // Pour chaque bloc récupéré
+        for (Block block : chestToAdd)
+            // Si le bloc n'est pas déjà sauvegardé
+            if (!partie.isThisChestAlreadySaved(block))
+                // On autorise son ouverture
+                partie.addAChest(block);
+
+        if (!chestToAdd.isEmpty())
+            Bukkit.getLogger().info(mineralcontest.prefix + " Allowed " + chestToAdd.size() + " chests to be opened");
 
 
         groupe.getGame().isGameInitialized = true;
@@ -214,9 +243,10 @@ public class WorldLoader {
         String nomFichierConfig = "mc_game_settings.yml";
         File fichierConfigPartie = new File(nomDossier + File.separator + nomFichierConfig);
 
+        // Si le fichier de la map n'existe pas, on charge le fichier par défaut
         if (!fichierConfigPartie.exists()) {
             groupe.sendToadmin(mineralcontest.prefixAdmin + Lang.error_cant_load_game_settings_file.toString());
-            return;
+            fichierConfigPartie = new File(mineralcontest.plugin.getDataFolder(), FileList.Config_default_game.toString());
         }
 
         YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(fichierConfigPartie);
@@ -231,7 +261,7 @@ public class WorldLoader {
                 try {
                     parametres.setCVARValeur(variable, (String) config.get(section + "." + variable));
                 } catch (Exception e) {
-                    groupe.sendToadmin(mineralcontest.prefixErreur + "Setting " + variable + " doesnt exists");
+                    //groupe.sendToadmin(mineralcontest.prefixErreur + "Setting " + variable + " doesnt exists");
                 }
             }
         }
@@ -247,6 +277,10 @@ public class WorldLoader {
         String nomFichierConfig = "mc_arena_chest_content.yml";
         File fichierConfigPartie = new File(nomDossier + File.separator + nomFichierConfig);
 
+        // Si le fichier de config n'existe pas, on charge celui par défaut
+        if (!fichierConfigPartie.exists())
+            fichierConfigPartie = new File(mineralcontest.plugin.getDataFolder(), FileList.Config_default_arena_chest.toString());
+
         try {
             groupe.getGame().getArene().getCoffre().initializeChestContent(fichierConfigPartie);
         } catch (Exception e) {
@@ -260,5 +294,19 @@ public class WorldLoader {
         for (ChatColor couleur : ChatColor.values())
             Bukkit.getLogger().info(couleur.getChar() + " == v: " + v);
         return null;
+    }
+
+    private static List<Block> getNearbyBlocksByMaterial(Material itemMaterial, Location location, int radius) {
+        List<Block> blocks = new ArrayList<Block>();
+        for (int x = location.getBlockX() - radius; x <= location.getBlockX() + radius; x++) {
+            for (int y = location.getBlockY() - radius; y <= location.getBlockY() + radius; y++) {
+                for (int z = location.getBlockZ() - radius; z <= location.getBlockZ() + radius; z++) {
+                    Block block = location.getWorld().getBlockAt(x, y, z);
+                    if (block.getType().equals(itemMaterial))
+                        blocks.add(block);
+                }
+            }
+        }
+        return blocks;
     }
 }

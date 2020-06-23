@@ -46,7 +46,6 @@ public class mcteam extends CommandTemplate {
         if (monde == null) monde = new Monde();
 
         accessCommande.add(PLAYER_COMMAND);
-        constructArguments();
     }
 
     @Override

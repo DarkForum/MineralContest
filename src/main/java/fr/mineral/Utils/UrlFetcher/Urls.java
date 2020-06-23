@@ -23,6 +23,7 @@ public class Urls {
     public static String WEBSITE_URL = "http://beta.synchroneyes.fr";
     public static String GET_ALL_URL_ROUTE = "/api/getAllUrls";
 
+    public static boolean areAllUrlFetched = false;
 
     /**
      * Récupères toutes les URL de l'api
@@ -64,6 +65,8 @@ public class Urls {
 
             API_URL_SEND_METRIC = jsonResponse.getString("api_send_metric");
             if (displayInConsole) logger.info(prefixURL + "API_URL_SEND_METRIC => " + API_URL_SEND_METRIC);
+
+            //areAllUrlFetched = true;
 
 
         } catch (Exception e) {

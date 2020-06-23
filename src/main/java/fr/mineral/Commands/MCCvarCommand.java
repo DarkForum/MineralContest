@@ -9,10 +9,16 @@ import fr.mineral.mineralcontest;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MCCvarCommand extends CommandTemplate {
 
@@ -31,7 +37,6 @@ public class MCCvarCommand extends CommandTemplate {
     public boolean performCommand(CommandSender commandSender, String command, String[] args) {
         Player joueur = (Player) commandSender;
         Groupe playerGroup = mineralcontest.getPlayerGroupe(joueur);
-        Bukkit.getLogger().severe(playerGroup.toString());
         if (args.length == 1) {
             for (GameCVAR cvar : playerGroup.getParametresPartie().getParametres())
                 if (cvar.getCommand().equalsIgnoreCase(args[0])) {
@@ -61,6 +66,18 @@ public class MCCvarCommand extends CommandTemplate {
 
                     }
 
+                    if (cvar.getCommand().equalsIgnoreCase("mp_enable_old_pvp")) {
+
+                        for (Player online : mineralcontest.getPlayerGroupe(joueur).getPlayers()) {
+                            if (cvar.getValeurNumerique() == 1) {
+                                online.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(1024d);
+                            } else {
+                                online.getAttribute(Attribute.GENERIC_ATTACK_SPEED).setBaseValue(4);
+                            }
+                        }
+
+                    }
+
                     return false;
                 }
 
@@ -84,4 +101,33 @@ public class MCCvarCommand extends CommandTemplate {
     public String getPermissionRequise() {
         return null;
     }
+
+    @Override
+    public List<String> tabComplete(CommandSender sender, String command, String[] arguments) {
+
+        if (sender instanceof Player) {
+            Player joueur = (Player) sender;
+            Groupe playerGroup = mineralcontest.getPlayerGroupe(joueur);
+            if (playerGroup == null) return null;
+
+            if (arguments.length == 1) {
+                String argument = arguments[0];
+
+                List<String> available_cvar = new ArrayList<>();
+                for (GameCVAR cvar : playerGroup.getParametresPartie().getParametres()) {
+                    String cvar_renamed = cvar.getCommand();
+                    cvar_renamed = cvar_renamed.replace("_", "");
+                    if (cvar.getCommand().equalsIgnoreCase(argument) || cvar.getCommand().toLowerCase().contains(argument.toLowerCase()) ||
+                            cvar_renamed.equalsIgnoreCase(argument) || cvar_renamed.toLowerCase().contains(argument.toLowerCase()))
+                        available_cvar.add(cvar.getCommand());
+                }
+
+                if (available_cvar.isEmpty()) available_cvar.add("No results");
+                return available_cvar;
+            }
+        }
+
+        return null;
+    }
+
 }

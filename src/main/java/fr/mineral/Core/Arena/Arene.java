@@ -2,7 +2,6 @@ package fr.mineral.Core.Arena;
 
 import fr.groups.Core.Groupe;
 import fr.mineral.Core.Arena.Zones.DeathZone;
-import fr.mineral.Settings.GameSettingsCvarOLD;
 import fr.mineral.Teams.Equipe;
 import fr.mineral.Translation.Lang;
 import fr.mineral.Utils.ErrorReporting.Error;
@@ -50,6 +49,14 @@ public class Arene {
     public Groupe groupe;
 
     public ChickenWaves chickenWaves;
+
+    public boolean isChestSpawned() {
+        return CHEST_SPAWNED;
+    }
+
+    public void setChestSpawned(boolean CHEST_SPAWNED) {
+        this.CHEST_SPAWNED = CHEST_SPAWNED;
+    }
 
     public Arene(Groupe g) {
         this.groupe = g;

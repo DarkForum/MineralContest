@@ -33,7 +33,6 @@ public class StartGameCommand implements CommandExecutor {
             } else {
 
                 try {
-                    Bukkit.getLogger().info("STARTING");
                     if(args.length == 1 && args[0].equals("force"))
                         partie.demarrerPartie(true);
                     else partie.demarrerPartie(false);

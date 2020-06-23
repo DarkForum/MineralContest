@@ -69,7 +69,7 @@ public class GameSettings {
      * @param cvar
      * @return null, int, string
      */
-    public GameCVAR getCVAR(String cvar) throws Exception {
+    public GameCVAR getCVAR(String cvar) {
         for (GameCVAR parametre : parametres) {
             // Si la commande passée en argument est égale au paramtre actuel
             if (parametre.getCommand().equalsIgnoreCase(cvar)) {
@@ -77,7 +77,8 @@ public class GameSettings {
             }
         }
 
-        throw new Exception("Paramètre inconnu: " + cvar);
+        Bukkit.getLogger().severe(mineralcontest.prefixErreur + "Invalid cvar name: " + cvar);
+        return null;
     }
 
 
@@ -201,7 +202,6 @@ public class GameSettings {
             parametresParDefaut.add(new GameCVAR("SCORE_GOLD", "50", "Permet de définir le score pour un lingot d'or", "cvar", true, true));
             parametresParDefaut.add(new GameCVAR("SCORE_DIAMOND", "150", "Permet de définir le score pour un diamant", "cvar", true, true));
             parametresParDefaut.add(new GameCVAR("SCORE_EMERALD", "300", "Permet de définir le score pour un émeraude", "cvar", true, true));
-            parametresParDefaut.add(new GameCVAR("mp_team_max_player", "2", "Permet de définir le nombre maximum de joueur par équipe", "cvar", true, true));
             parametresParDefaut.add(new GameCVAR("mp_set_playzone_radius", "1000", "Permet de définir le rayon de la zone jouable en nombre de bloc", "cvar", true, true));
             parametresParDefaut.add(new GameCVAR("mp_enable_friendly_fire", "1", "Permet d'activer ou non les dégats entre alliés", "cvar", true, true));
             parametresParDefaut.add(new GameCVAR("mp_enable_old_pvp", "1", "Permet d'activer ou non l'ancien système de pvp", "cvar", true, true));
@@ -212,9 +212,9 @@ public class GameSettings {
             parametresParDefaut.add(new GameCVAR("max_time_between_chests", "15", "Permet de définir le temps maximum avant l'apparition d'un coffre d'arène", "arena", true, true));
             parametresParDefaut.add(new GameCVAR("min_time_between_chests", "10", "Permet de définir le temps minimum avant l'apparition d'un coffre d'arène", "arena", true, true));
             parametresParDefaut.add(new GameCVAR("max_teleport_time", "15", "Permet de définir le temps maximum afin de pouvoir se téléporter après l'apparition d'un coffre", "cvar", true, true));
-            parametresParDefaut.add(new GameCVAR("max_item_in_chest", "20", "Permet de définir le nombre maximum d'objet dans un coffre d'équipe", "cvar", true, true));
-            parametresParDefaut.add(new GameCVAR("min_item_in_chest", "10", "Permet de définir le nombre minimum d'objet dans un coffre d'équipe", "cvar", true, true));
-            parametresParDefaut.add(new GameCVAR("death_time", "10", "Permet de définir le temps de réapparition", "cvar", true, true));
+            parametresParDefaut.add(new GameCVAR("max_item_in_chest", "20", "Permet de définir le nombre maximum d'objet dans un coffre d'équipe", "arena", true, true));
+            parametresParDefaut.add(new GameCVAR("min_item_in_chest", "10", "Permet de définir le nombre minimum d'objet dans un coffre d'équipe", "arena", true, true));
+            parametresParDefaut.add(new GameCVAR("death_time", "10", "Permet de définir le temps de réapparition", "settings", true, true));
             parametresParDefaut.add(new GameCVAR("chicken_spawn_time", "60", "Permet de définir le temps restant necessaire avant de faire apparaitre les poulets dans l'arène", "arena", true, true));
             parametresParDefaut.add(new GameCVAR("chicken_spawn_interval", "30", "Permet de définir le temps en seconde necessaire avant de pouvoir faire apparaitre une vague de poulet", "arena", true, true));
             parametresParDefaut.add(new GameCVAR("chicken_spawn_min_count", "2", "Permet de définir le nombre minimum de poulet dans une vague d'apparition", "arena", true, true));

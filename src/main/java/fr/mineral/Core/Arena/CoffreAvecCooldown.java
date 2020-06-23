@@ -36,6 +36,7 @@ public class CoffreAvecCooldown {
 
     private BukkitRunnable chestTimer;
 
+
     public CoffreAvecCooldown(Location loc, Arene arene) {
         this.arene = arene;
         this.position = loc;
@@ -66,7 +67,9 @@ public class CoffreAvecCooldown {
     }
 
 
-    public boolean isChestSpawned() { return this.spawned; }
+    public boolean isChestSpawned() {
+        return arene.isChestSpawned();
+    }
 
     public void clear() {
         this.position.getBlock().setType(Material.AIR);
@@ -113,6 +116,7 @@ public class CoffreAvecCooldown {
             this.opened = false;
             this.openingPlayer = null;
             this.spawned = true;
+            arene.setChestSpawned(true);
 
             arene.groupe.getGame().addAChest(position.getBlock());
 
@@ -206,6 +210,7 @@ public class CoffreAvecCooldown {
                         close();
                         mineralcontest.broadcastMessage(mineralcontest.prefixGlobal + Lang.arena_chest_opened.toString(), arene.groupe);
                         mineralcontest.getPlayerGame(joueur).getArene().disableTeleport();
+                        arene.setChestSpawned(false);
                         this.cancel();
 
                     }

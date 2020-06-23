@@ -57,6 +57,7 @@ public class MapBuilder {
     public static void enableMapBuilder() {
         instance.isBuilderModeEnabled = true;
         instance.enableMapBuilding();
+        Bukkit.broadcastMessage("MapBuilder mode enabled!");
     }
 
     public static void disableMapBuilder() {
@@ -85,9 +86,6 @@ public class MapBuilder {
 
     private void registerCommands() {
         printToConsole("Registering commands");
-
-        this.bukkitCommandMap.register(SpawnHouse.pluginCommand, new SpawnHouse());
-        this.bukkitCommandMap.register(SpawnArena.pluginCommand, new SpawnArena());
 
         this.bukkitCommandMap.register("", new mcteam());
         this.bukkitCommandMap.register("", new mcarena());

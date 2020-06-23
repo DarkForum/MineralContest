@@ -3,14 +3,12 @@ package fr.mineral.Core.Arena.Zones;
 import fr.groups.Core.Groupe;
 import fr.mineral.Core.Game.Game;
 import fr.mineral.Core.House;
-import fr.mineral.Settings.GameSettingsCvarOLD;
 import fr.mineral.Teams.Equipe;
 import fr.mineral.Translation.Lang;
 import fr.mineral.Utils.ErrorReporting.Error;
 import fr.mineral.Utils.Player.CouplePlayer;
 import fr.mineral.Utils.Player.PlayerUtils;
 import fr.mineral.mineralcontest;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -63,7 +61,7 @@ public class DeathZone {
 
     // Cette fonction réduit le temps des joueurs d'une seconde
     // Elle sera appelée dans le runnable bukkit qui gère le temps
-    public void reducePlayerTimer() throws Exception {
+    public synchronized void reducePlayerTimer() throws Exception {
 
         // SI on a des joueurs dans la deathZone
         if(joueurs.size() != 0) {
@@ -83,7 +81,7 @@ public class DeathZone {
         }
     }
 
-    public int getPlayerDeathTime(Player joueur) {
+    public synchronized int getPlayerDeathTime(Player joueur) {
         if(isPlayerDead(joueur))
             for(CouplePlayer cp : getPlayers())
                 if(cp.getJoueur().equals(joueur))
@@ -92,7 +90,7 @@ public class DeathZone {
         return 0;
     }
 
-    public void add(Player joueur) throws Exception {
+    public synchronized void add(Player joueur) throws Exception {
         timeInDeathzone = groupe.getParametresPartie().getCVAR("death_time").getValeurNumerique();
         Game partie = mineralcontest.getPlayerGame(joueur);
 
@@ -122,7 +120,7 @@ public class DeathZone {
 
     }
 
-    public boolean isPlayerDead(Player joueur) {
+    public synchronized boolean isPlayerDead(Player joueur) {
         for(CouplePlayer cp : getPlayers()) {
             if(cp.getJoueur().equals(joueur))
                 return true;
@@ -131,7 +129,7 @@ public class DeathZone {
         return false;
     }
 
-    private void libererJoueur(CouplePlayer DeathZonePlayer) throws Exception {
+    private synchronized void libererJoueur(CouplePlayer DeathZonePlayer) throws Exception {
 
         // SI le joueur n'a plus de temps à passer ici
         if(DeathZonePlayer.getValeur() <= 0) {

@@ -3,7 +3,6 @@ package fr.mineral.Events;
 import fr.mineral.Core.Arena.Coffre;
 import fr.mineral.Core.Arena.CoffreAvecCooldown;
 import fr.mineral.Core.Game.Game;
-import fr.mineral.Settings.GameSettingsCvarOLD;
 import fr.mineral.Core.House;
 import fr.mineral.Translation.Lang;
 import fr.mineral.Utils.ErrorReporting.Error;
@@ -21,7 +20,6 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 public class ChestEvent implements Listener {
 
@@ -149,7 +147,7 @@ public class ChestEvent implements Listener {
                 }
 
                 if(arenaChest != null) {
-                    if(arenaChest.getPosition().equals(openedChest.getLocation())) {
+                    if (arenaChest.getPosition().equals(openedChest.getLocation()) && arenaChest.isChestSpawned()) {
                         if(arenaChest.openingPlayer == null) {
                             arenaChest.openChest(player);
                         }else{

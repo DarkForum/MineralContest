@@ -2,7 +2,6 @@ package fr.mineral.Utils.Metric;
 
 import fr.mineral.Core.Game.Game;
 import fr.mineral.Settings.GameSettings;
-import fr.mineral.Settings.GameSettingsCvarOLD;
 import fr.mineral.Utils.ErrorReporting.Error;
 import fr.mineral.Utils.UrlFetcher.Urls;
 import fr.mineral.mineralcontest;

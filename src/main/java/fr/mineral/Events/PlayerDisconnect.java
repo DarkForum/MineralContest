@@ -42,12 +42,10 @@ public class PlayerDisconnect implements Listener {
                 if (partie.isReferee(joueur)) partie.removeReferee(joueur);
 
 
-
-
-            if ((partie.isGameStarted() || partie.isPreGame()) && team != null) {
-                partie.pauseGame();
+            if ((partie.isGameStarted() || partie.isPreGame())) {
+                //partie.pauseGame();
                 partie.groupe.addDisconnectedPlayer(joueur);
-                house.getPorte().forceCloseDoor();
+                if (house != null) house.getPorte().forceCloseDoor();
             }
 
 

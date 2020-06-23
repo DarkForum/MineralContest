@@ -2,7 +2,6 @@ package fr.mineral.Events;
 
 import fr.mineral.Core.Game.Game;
 import fr.mineral.Settings.GameSettings;
-import fr.mineral.Settings.GameSettingsCvarOLD;
 import fr.mineral.Teams.Equipe;
 import fr.mineral.Translation.Lang;
 import fr.mineral.Utils.Player.PlayerUtils;
@@ -10,7 +9,6 @@ import fr.mineral.mineralcontest;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,6 +24,11 @@ public class EntityDamage implements Listener {
         if (mineralcontest.isAMineralContestWorld(worldEvent)) {
             Game partie = mineralcontest.getWorldGame(worldEvent);
             if (partie == null) return;
+            if (!partie.isGameStarted() || partie.isGamePaused()) {
+                event.setCancelled(true);
+                return;
+            }
+
             if (event.getEntity() instanceof Player && partie.isGameStarted()) {
                 Player victime = (Player) event.getEntity();
 
@@ -56,6 +59,10 @@ public class EntityDamage implements Listener {
         World worldEvent = event.getEntity().getWorld();
         if (mineralcontest.isAMineralContestWorld(worldEvent)) {
             Game partie = mineralcontest.getWorldGame(worldEvent);
+            if (partie != null && (!partie.isGameStarted() || partie.isGamePaused())) {
+                event.setCancelled(true);
+                return;
+            }
             if (event.getEntity() instanceof Player && partie != null && partie.isGameStarted()) {
                 Player victime = (Player) event.getEntity();
                 Player attaquant = null;
@@ -117,14 +124,7 @@ public class EntityDamage implements Listener {
 
                 }
 
-            } else {
-
-                if (!(event.getEntity() instanceof Chicken)) {
-                    if (partie != null && partie.groupe.getParametresPartie().getCVAR("enable_monster_in_protected_zone").getValeurNumerique() != 1)
-                        event.setCancelled(true);
-                }
             }
-            return;
         }
     }
 

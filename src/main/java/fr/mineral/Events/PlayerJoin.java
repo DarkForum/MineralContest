@@ -2,7 +2,6 @@ package fr.mineral.Events;
 
 import fr.mineral.Core.Game.Game;
 import fr.mineral.Settings.GameSettings;
-import fr.mineral.Settings.GameSettingsCvarOLD;
 import fr.mineral.Teams.Equipe;
 import fr.mineral.Translation.Lang;
 import fr.mineral.Utils.Player.PlayerUtils;
@@ -94,38 +93,6 @@ public class PlayerJoin implements Listener {
                     game.groupe.playerHaveReconnected(player);
                     return;
 
-                    /*// if oldPLayerTeam is null, then he wasn't in a team
-                    // If he is OP, then he should be referee
-                    // Else, admin need to decide what to do
-                    if(oldPlayerTeam == null) {
-
-                        if(player.isOp()) {
-                            // If player is op and oldteam is null, then he is a referee
-                            game.addReferee(player);
-                            mineralcontest.log.info("Player " + playerName + " was OP, had no team but was registered inside the disconnected players list, so we added him to the referees");
-                            return;
-                        } else {
-                            // Player is not OP
-                            if(thereIsAnAdminLoggedIn) {
-                                // Admin needs to decide what to do, should'nt happen
-                                mineralcontest.broadcastMessageToAdmins(playerName + " joined the game, he was connected earlier but it seems like we dont know his team. You can switch him into a team by using /switch " + playerName + " <team>");
-                                mineralcontest.log.info("Player " + playerName + " joined the game, he was NOT OP, he had no team but was registered inside the disconnected players, admin needs to decide what to do.");
-                                if(!game.isGamePaused()) game.pauseGame();
-
-                            } else {
-                                player.kickPlayer("PlayerJoin-L-74 - There is no admin logged in and the system doesn't know what to do. Please contact the plugin author");
-                                mineralcontest.log.severe("PlayerJoin-L-74 - " + playerName + " tried to join but There is no admin logged in and the system doesn't know what to do. Please contact the plugin author");
-                            }
-                            return;
-                        }
-
-                    } else {
-                        // His old team isnt null, we add him back
-                        oldPlayerTeam.addPlayerToTeam(player, true);
-                        game.removePlayerFromDisconnected(player);
-                        if(game.getDisconnectedPlayersCount() == 0) game.resumeGame();
-                        return;
-                    }*/
 
                 } else {
                     // The player was not connected earlier
@@ -164,7 +131,7 @@ public class PlayerJoin implements Listener {
                 // If the player have disconnected during preGame
                 if(havePlayerDisconnectedEarlier) {
                     // We put him back into his old team
-                    this.oldPlayerTeam.addPlayerToTeam(player, true);
+                    this.oldPlayerTeam.addPlayerToTeam(player, true, false);
                     game.removePlayerFromDisconnected(player);
                     if(game.getDisconnectedPlayersCount() == 0) game.resumeGame();
                     return;
@@ -201,8 +168,7 @@ public class PlayerJoin implements Listener {
                         else if(oldPlayerTeam == null) {
                             player.kickPlayer("PlayerJoin-L-172 - There is no admin logged in and the system doesn't know what to do. Please contact the plugin author");
                             mineralcontest.log.severe("PlayerJoin-L-173 - " + playerName + " tried to join but There is no admin logged in and the system doesn't know what to do. Please contact the plugin author");
-                        }
-                        else this.oldPlayerTeam.addPlayerToTeam(player, true);
+                        } else this.oldPlayerTeam.addPlayerToTeam(player, true, false);
                     } else {
 
                         if(isPlayerAllowedToJoin) {
@@ -224,13 +190,6 @@ public class PlayerJoin implements Listener {
             player.sendMessage(ChatColor.GREEN + "[] Server running Mineral Contest v" + mineralcontest.plugin.getDescription().getVersion());
 
 
-            Bukkit.getScheduler().scheduleSyncDelayedTask(mineralcontest.plugin, () -> {
-                String message = mineralcontest.prefixGlobal + Lang.translate(Lang.hud_awaiting_players.toString(), game);
-
-                mineralcontest.broadcastMessage(mineralcontest.prefixGlobal + message, game.groupe);
-                if (game.areAllPlayerLoggedIn()) game.enableVote();
-            }, 20);
-
             if (player.isOp()) mineralcontest.afficherMessageVersionToPlayer(player);
 
 
@@ -244,10 +203,13 @@ public class PlayerJoin implements Listener {
 
     private void informAdminsThatAPlayerTriedToJoin(String playerName) {
         mineralcontest.broadcastMessageToAdmins("Player " + playerName + " tried to join, you can allow him to join by typing /allow " + playerName);
+        Bukkit.getLogger().info("Player " + playerName + " tried to join, you can allow him to join by typing /allow " + playerName);
     }
 
     private void informAdminThatAPlayerNeedASwitch(String playerName) {
         mineralcontest.broadcastMessageToAdmins("Player " + playerName + " have joined the game; switch him into a team with /switch " + playerName + " <team>");
+        Bukkit.getLogger().info("Player " + playerName + " have joined the game; switch him into a team with /switch " + playerName + " <team>");
+
     }
 
 }

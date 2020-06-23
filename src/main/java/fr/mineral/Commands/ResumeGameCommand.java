@@ -27,12 +27,9 @@ public class ResumeGameCommand implements CommandExecutor {
             }
 
             if(command.getName().equalsIgnoreCase("resume")) {
-                Equipe teamNonPleine = partie.getEquipeNonPleine(); //mineralcontest.getPlayerGame(joueur).getEquipeNonPleine();
-                if (partie.isGamePaused() && teamNonPleine == null) {
+                if (partie.isGamePaused()) {
                     partie.resumeGame();
-                } else {
-                    sender.sendMessage(mineralcontest.prefixErreur + Lang.translate(Lang.error_when_resume.toString()));
-                    if(teamNonPleine != null) sender.sendMessage(mineralcontest.prefixErreur + Lang.translate(Lang.admin_team_non_empty.toString(), teamNonPleine));
+                    return true;
                 }
             }
         }

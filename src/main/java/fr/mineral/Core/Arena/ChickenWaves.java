@@ -23,7 +23,7 @@ public class ChickenWaves {
     private Arene arene;
     private World monde;
     private boolean started = false;
-    private boolean enabled = true;
+    private boolean enabled = false;
 
     private LinkedList<LivingEntity> pouletsEnVie;
 
@@ -56,8 +56,10 @@ public class ChickenWaves {
      * Démarre les vagues de poulets
      */
     public void start() {
-        if (started || !enabled) return;
+        if (started) return;
         this.started = true;
+        this.enabled = true;
+
         arene.groupe.sendToEveryone(ChatColor.GOLD + "----------------------");
         arene.groupe.sendToEveryone(mineralcontest.prefixGlobal + "Les vagues d'apparition de poulet dans l'arène ont débuté !");
         arene.groupe.sendToEveryone(ChatColor.GOLD + "----------------------");
