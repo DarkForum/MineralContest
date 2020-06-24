@@ -31,3 +31,4 @@ config:
     max_teleport_time: '15'
     max_item_in_chest: '20'
     min_item_in_chest: '10'
+    arena_warn_chest_time: '10'

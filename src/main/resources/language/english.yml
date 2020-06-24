@@ -232,3 +232,5 @@ set_yourself_as_ready_to_start_votemap: All players must be ready in order to st
 player_joined_our_group: %playerName% have joined our group!
 error_no_teams_with_player: There is no teams with players!
 currently_no_player_in_this_team: "The team is empty"
+arena_chest_will_spawn_in: "Arena chest will spawn in %arenaChestTimeLeft% seconds!"
+

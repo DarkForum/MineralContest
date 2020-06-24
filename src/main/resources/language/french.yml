@@ -231,3 +231,5 @@ error_no_maps_downloaded_to_start_game: Aucune map n'a été téléchargée, un 
 set_yourself_as_ready_to_start_votemap: Tous les joueurs doivent être prêt pour démarrer le vote, marquez-vous comme prêt avec la commande /ready
 player_joined_our_group: Le joueur %playerName% a rejoin le groupe !
 currently_no_player_in_this_team: "Aucun joueur dans cette équipe pour le moment"
+arena_chest_will_spawn_in: "Le coffre d'arène va apparaitre dans %arenaChestTimeLeft% secondes!"
+
